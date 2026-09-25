@@ -1,0 +1,32 @@
+{
+	"name": "SignWriting",
+	"author": [
+		"Your Name"
+	],
+	"description": "Renders Sutton SignWriting FSW notation as SVG.",
+	"version": "0.1.0",
+	"type": "parserhook",
+	"license-name": "GPL-2.0-or-later",
+
+	"AutoloadClasses": {
+		"MediaWiki\\Extension\\SignWriting\\SignWriting": "SignWriting.php",
+		"MediaWiki\\Extension\\SignWriting\\FSWParser": "FSWParser.php",
+		"MediaWiki\\Extension\\SignWriting\\SVGRenderer": "SVGRenderer.php"
+	},
+
+	"ResourceModules": {
+		"ext.signwriting.styles": {
+			"localBasePath": "",
+			"remoteExtPath": "SignWriting",
+			"styles": [
+				"signwriting.css"
+			]
+		}
+	},
+
+	"Hooks": {
+		"ParserFirstCallInit": "MediaWiki\\Extension\\SignWriting\\SignWriting::onParserFirstCallInit"
+	},
+
+	"manifest_version": 1
+}

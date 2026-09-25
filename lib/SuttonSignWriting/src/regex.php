@@ -1,0 +1,110 @@
+<?php
+namespace Sgnw\Core\Regex;
+
+/**
+ * Convert a regex with capturing groups into a non-capturing equivalent.
+ *
+ * @param string $pattern
+ * @return string
+ */
+function non_capturing($pattern)
+{
+    return preg_replace('/\((?!\?)/', '(?:', $pattern);
+}
+
+// ----------------------------
+// FSW patterns
+// ----------------------------
+
+const FSW_PATTERN_NULL = 'S00000';
+const FSW_PATTERN_SYMBOL = 'S[123][0-9a-f]{2}[0-5][0-9a-f]';
+const FSW_PATTERN_NUMBER = '[0-9]{3}';
+const FSW_PATTERN_SORT = 'A';
+const FSW_PATTERN_BOX = '[BLMR]';
+const FSW_PATTERN_NULL_OR_SYMBOL = '(?:' . FSW_PATTERN_NULL . '|' . FSW_PATTERN_SYMBOL . ')';
+const FSW_PATTERN_PREFIX = '(?:' . FSW_PATTERN_SORT . FSW_PATTERN_NULL_OR_SYMBOL . '+)';
+const FSW_PATTERN_COORD = FSW_PATTERN_NUMBER . 'x' . FSW_PATTERN_NUMBER;
+const FSW_PATTERN_SPATIAL = FSW_PATTERN_SYMBOL . FSW_PATTERN_COORD;
+const FSW_PATTERN_SIGNBOX = FSW_PATTERN_BOX . FSW_PATTERN_COORD . '(?:' . FSW_PATTERN_SPATIAL . ')*';
+const FSW_PATTERN_SIGN = FSW_PATTERN_PREFIX . '?' . FSW_PATTERN_SIGNBOX;
+const FSW_PATTERN_SORTABLE = FSW_PATTERN_PREFIX . FSW_PATTERN_SIGNBOX;
+
+// ----------------------------
+// FSW Query patterns
+// ----------------------------
+
+const FSWQUERY_PATTERN_NULL = FSW_PATTERN_NULL;
+const FSWQUERY_PATTERN_BASE = '[123][0-9a-f]{2}';
+const FSWQUERY_PATTERN_COORD = '(?:' . FSW_PATTERN_COORD . ')?';
+const FSWQUERY_PATTERN_VAR = 'V[0-9]+';
+const FSWQUERY_PATTERN_SYMBOL = 'S' . FSWQUERY_PATTERN_BASE . '[0-5u][0-9a-fu]';
+const FSWQUERY_PATTERN_NULL_OR_SYMBOL = '(?:' . FSWQUERY_PATTERN_NULL . '|' . FSWQUERY_PATTERN_SYMBOL . ')';
+const FSWQUERY_PATTERN_RANGE = 'R' . FSWQUERY_PATTERN_BASE . 't' . FSWQUERY_PATTERN_BASE;
+const FSWQUERY_PATTERN_ITEM = '(?:' . FSWQUERY_PATTERN_NULL . '|' . FSWQUERY_PATTERN_SYMBOL . '|' . FSWQUERY_PATTERN_RANGE . ')';
+const FSWQUERY_PATTERN_LIST = FSWQUERY_PATTERN_ITEM . '(?:o' . FSWQUERY_PATTERN_ITEM . ')*';
+const FSWQUERY_PATTERN_PREFIX = '(?:A(?:' . FSWQUERY_PATTERN_LIST . ')+)?T';
+const FSWQUERY_PATTERN_SIGNBOX = '(?:' . FSWQUERY_PATTERN_LIST . FSWQUERY_PATTERN_COORD . ')*';
+const FSWQUERY_PATTERN_FULL = 'Q(' . FSWQUERY_PATTERN_PREFIX . ')?(' . FSWQUERY_PATTERN_SIGNBOX . ')?(' . FSWQUERY_PATTERN_VAR . ')?(-?)';
+
+// ----------------------------
+// Style patterns
+// ----------------------------
+
+const STYLE_PATTERN_COLORIZE = 'C';
+const STYLE_PATTERN_COLORHEX = '(?:[0-9a-fA-F]{3}){1,2}';
+const STYLE_PATTERN_COLORNAME = '[a-zA-Z]+';
+const STYLE_PATTERN_PADDING = 'P[0-9]{2}';
+const STYLE_PATTERN_ZOOM = 'Z(?:[0-9]+(?:\\.[0-9]+)?|x)';
+const STYLE_PATTERN_CLASSBASE = '-?[_a-zA-Z][_a-zA-Z0-9-]{0,100}';
+const STYLE_PATTERN_ID = '[a-zA-Z][_a-zA-Z0-9-]{0,100}';
+const STYLE_PATTERN_COLORBASE = '(?:' . STYLE_PATTERN_COLORHEX . '|' . STYLE_PATTERN_COLORNAME . ')';
+const STYLE_PATTERN_COLOR = '_' . STYLE_PATTERN_COLORBASE . '_';
+const STYLE_PATTERN_COLORS = '_' . STYLE_PATTERN_COLORBASE . '(?:,' . STYLE_PATTERN_COLORBASE . ')?_';
+const STYLE_PATTERN_BACKGROUND = 'G' . STYLE_PATTERN_COLOR;
+const STYLE_PATTERN_DETAIL = 'D' . STYLE_PATTERN_COLORS;
+const STYLE_PATTERN_DETAILSYM = 'D[0-9]{2}' . STYLE_PATTERN_COLORS;
+const STYLE_PATTERN_CLASSES = STYLE_PATTERN_CLASSBASE . '(?: ' . STYLE_PATTERN_CLASSBASE . ')*';
+const STYLE_PATTERN_FULL_GROUPS =
+    '-(' . STYLE_PATTERN_COLORIZE . ')?(' . STYLE_PATTERN_PADDING . ')?(' . STYLE_PATTERN_BACKGROUND . ')?'
+    . '(' . STYLE_PATTERN_DETAIL . ')?(' . STYLE_PATTERN_ZOOM . ')?'
+    . '(?:-((?:' . STYLE_PATTERN_DETAILSYM . ')*))?'
+    . '(?:-(' . STYLE_PATTERN_CLASSES . ')?!(?:(' . STYLE_PATTERN_ID . ')!)?)?';
+const STYLE_PATTERN_FULL =
+    '-(?:' . STYLE_PATTERN_COLORIZE . ')?(?:' . STYLE_PATTERN_PADDING . ')?(?:' . STYLE_PATTERN_BACKGROUND . ')?'
+    . '(?:' . STYLE_PATTERN_DETAIL . ')?(?:' . STYLE_PATTERN_ZOOM . ')?'
+    . '(?:-(?:(?:' . STYLE_PATTERN_DETAILSYM . ')*))?'
+    . '(?:-(?:' . STYLE_PATTERN_CLASSES . ')?!(?:(?:' . STYLE_PATTERN_ID . ')!)?)?';
+
+// ----------------------------
+// SWU patterns (used by convert)
+// ----------------------------
+
+const SWU_PATTERN_NULL = '\\x{40000}';
+const SWU_PATTERN_SYMBOL = '(?:[\\x{40001}-\\x{40FFF}]|[\\x{41000}-\\x{4FCFF}]|[\\x{4FD00}-\\x{4FD80}])';
+const SWU_PATTERN_NUMBER = '[\\x{1D80C}-\\x{1D9FF}]';
+const SWU_PATTERN_SORT = '\\x{1D800}';
+const SWU_PATTERN_BOX = '[\\x{1D801}-\\x{1D804}]';
+const SWU_PATTERN_NULL_OR_SYMBOL = '(?:' . SWU_PATTERN_NULL . '|' . SWU_PATTERN_SYMBOL . ')';
+const SWU_PATTERN_PREFIX = '(?:' . SWU_PATTERN_SORT . SWU_PATTERN_NULL_OR_SYMBOL . '+)';
+const SWU_PATTERN_COORD = '(?:' . SWU_PATTERN_NUMBER . '){2}';
+const SWU_PATTERN_SPATIAL = SWU_PATTERN_SYMBOL . SWU_PATTERN_COORD;
+const SWU_PATTERN_SIGNBOX = SWU_PATTERN_BOX . SWU_PATTERN_COORD . '(?:' . SWU_PATTERN_SPATIAL . ')*';
+const SWU_PATTERN_SIGN = SWU_PATTERN_PREFIX . '?' . SWU_PATTERN_SIGNBOX;
+const SWU_PATTERN_SORTABLE = SWU_PATTERN_PREFIX . SWU_PATTERN_SIGNBOX;
+
+// ----------------------------
+// SWU Query patterns
+// ----------------------------
+
+const SWUQUERY_PATTERN_NULL = SWU_PATTERN_NULL;
+const SWUQUERY_PATTERN_BASE = SWU_PATTERN_SYMBOL;
+const SWUQUERY_PATTERN_COORD = '(?:' . SWU_PATTERN_NUMBER . '{2})?';
+const SWUQUERY_PATTERN_VAR = 'V[0-9]+';
+const SWUQUERY_PATTERN_SYMBOL = SWUQUERY_PATTERN_BASE . 'f?r?';
+const SWUQUERY_PATTERN_NULL_OR_SYMBOL = '(?:' . SWUQUERY_PATTERN_NULL . '|' . SWUQUERY_PATTERN_SYMBOL . ')';
+const SWUQUERY_PATTERN_RANGE = 'R' . SWUQUERY_PATTERN_BASE . SWUQUERY_PATTERN_BASE;
+const SWUQUERY_PATTERN_ITEM = '(?:' . SWUQUERY_PATTERN_NULL . '|' . SWUQUERY_PATTERN_SYMBOL . '|' . SWUQUERY_PATTERN_RANGE . ')';
+const SWUQUERY_PATTERN_LIST = SWUQUERY_PATTERN_ITEM . '(?:o' . SWUQUERY_PATTERN_ITEM . ')*';
+const SWUQUERY_PATTERN_PREFIX = '(?:A(?:' . SWUQUERY_PATTERN_LIST . ')+)?T';
+const SWUQUERY_PATTERN_SIGNBOX = '(?:' . SWUQUERY_PATTERN_LIST . SWUQUERY_PATTERN_COORD . ')*';
+const SWUQUERY_PATTERN_FULL = 'Q(' . SWUQUERY_PATTERN_PREFIX . ')?(' . SWUQUERY_PATTERN_SIGNBOX . ')?(' . SWUQUERY_PATTERN_VAR . ')?(-?)';
