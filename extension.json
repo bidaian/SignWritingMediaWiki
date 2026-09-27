@@ -7,12 +7,26 @@
 	"version": "0.1.0",
 	"type": "parserhook",
 	"license-name": "GPL-2.0-or-later",
-
-	"AutoloadClasses": {
-		"MediaWiki\\Extension\\SignWriting\\SignWriting": "SignWriting.php",
-		"MediaWiki\\Extension\\SignWriting\\FSWParser": "FSWParser.php",
-		"MediaWiki\\Extension\\SignWriting\\SVGRenderer": "SVGRenderer.php"
-	},
+"ParsoidModules": [
+    {
+        "name": "SignWriting",
+        "tags": [
+            {
+                "name": "signwriting",
+                "handler": {
+                    "class": "MediaWiki\\Extension\\SignWriting\\SignWritingParsoid"
+                }
+            }
+        ]
+    }
+],
+"AutoloadClasses": {
+    "MediaWiki\\Extension\\SignWriting\\SignWriting": "SignWriting.php",
+    "MediaWiki\\Extension\\SignWriting\\FSWParser": "FSWParser.php",
+    "MediaWiki\\Extension\\SignWriting\\SVGRenderer": "SVGRenderer.php",
+    "MediaWiki\\Extension\\SignWriting\\SpecialSignWritingEdit": "SpecialSignWritingEdit.php",
+    "MediaWiki\\Extension\\SignWriting\\SignWritingParsoid": "SignWritingParsoid.php"
+},
 
 	"ResourceModules": {
 		"ext.signwriting.styles": {
@@ -21,12 +35,56 @@
 			"styles": [
 				"signwriting.css"
 			]
-		}
+		},
+		"ext.signWriting.editor": {
+			"localBasePath": "modules",
+			"remoteExtPath": "SignWriting/modules",
+			"scripts": [
+				"signwriting-editor.js"
+			],
+			"dependencies": [
+				"mediawiki.base"
+			]
+		},
+"ext.signwriting.visualEditor": {
+	"localBasePath": "modules",
+	"remoteExtPath": "SignWriting/modules",
+	"scripts": [
+		"ve/dm/ve.dm.MWSignWritingNode.js",
+		"ve/ce/ve.ce.MWSignWritingNode.js",
+		"ve/ui/ve.ui.MWSignWritingInspector.js",
+		"ve/ui/ve.ui.MWSignWritingContextItem.js"
+	],
+	"dependencies": [
+		"ext.visualEditor.mwcore"
+	]
+}
+	
 	},
 
 	"Hooks": {
 		"ParserFirstCallInit": "MediaWiki\\Extension\\SignWriting\\SignWriting::onParserFirstCallInit"
 	},
+"SpecialPages": {
+	"SignWritingEdit": {
+		"class": "MediaWiki\\Extension\\SignWriting\\SpecialSignWritingEdit"
+	}
+},
+"MessagesDirs": {
+	"SignWriting": [
+		"i18n"
+	]
+},
+"ExtensionMessagesFiles": {
+	"SignWritingAlias": "aliases.i18n.php"
+},
+"attributes": {
+	"VisualEditor": {
+		"PluginModules": [
+			"ext.signwriting.visualEditor"
+		]
+	}
+},
 
-	"manifest_version": 1
+	"manifest_version": 2
 }
