@@ -4,6 +4,32 @@
 
 /*
  * ------------------------------------------------------------
+ * SignWriting pagetitle
+ * ------------------------------------------------------------
+ */
+.signwriting-title {
+	display: inline-block !important;
+	vertical-align: middle !important;
+}
+
+.signwriting-title .signwriting {
+	display: inline-block !important;
+	width: auto !important;
+	height: auto !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+}
+
+.signwriting-title .signwriting svg {
+	display: block !important;
+	width: auto !important;
+	height: 1.8em !important;
+	max-width: none !important;
+}
+
+/*
+ * ------------------------------------------------------------
  * SignWriting paragraph
  * ------------------------------------------------------------
  */
@@ -173,4 +199,31 @@ p:has(> .signwriting-paragraph) {
 	.signwriting-item {
 		margin-bottom: 0.75em !important;
 	}
+}
+
+/*
+ * ------------------------------------------------------------
+ * Page title
+ * ------------------------------------------------------------
+ */
+.mw-signwriting-title {
+	display: inline-flex;
+	align-items: center;
+	vertical-align: middle;
+	line-height: 1;
+}
+
+.mw-signwriting-title .signwriting {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	line-height: 1 !important;
+}
+
+.mw-signwriting-title .signwriting svg {
+	display: block;
+	margin: 0 !important;
 }

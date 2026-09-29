@@ -2,6 +2,8 @@
 
 namespace MediaWiki\Extension\SignWriting;
 
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Parser\ParserOutput;
 use Parser;
 use PPFrame;
 
@@ -14,15 +16,95 @@ class SignWriting {
 		);
 	}
 
+	/**
+	 * Replace an FSW page title with a SignWriting SVG.
+	 */
+	public static function onOutputPageParserOutput(
+		OutputPage $outputPage,
+		ParserOutput $parserOutput
+	): void {
+		$title = $outputPage->getTitle();
+
+		if ( !$title ) {
+			return;
+		}
+
+		$fsw = $title->getText();
+
+		if ( $fsw === '' ) {
+			return;
+		}
+
+		/*
+		 * Try to parse the page title as FSW.
+		 *
+		 * FSWParser is responsible for deciding whether the
+		 * title is actually a valid SignWriting string.
+		 */
+		try {
+			$sign = FSWParser::parse( $fsw );
+		} catch ( \Throwable $e ) {
+			return;
+		}
+
+		/*
+		 * Use the same SVGRenderer as the <signwriting> parser tag.
+		 */
+		try {
+			$renderer = new SVGRenderer();
+
+			$svg = $renderer->render(
+				$sign,
+				$fsw
+			);
+		} catch ( \Throwable $e ) {
+			return;
+		}
+
+		if ( $svg === '' ) {
+			return;
+		}
+
+		/*
+		 * The title pipeline accepts this HTML placeholder.
+		 *
+		 * The actual SVG is inserted later by JavaScript because
+		 * MediaWiki does not allow the SVG markup itself to survive
+		 * the title processing pipeline.
+		 */
+		$parserOutput->setDisplayTitle(
+			'<span class="mw-signwriting-title"></span>'
+		);
+
+		/*
+		 * Pass the already-generated SVG to JavaScript.
+		 */
+		$outputPage->addJsConfigVars(
+			'wgSignWritingTitleSvg',
+			$svg
+		);
+
+		/*
+		 * Load the small title integration module.
+		 */
+		$outputPage->addModules(
+			[ 'ext.signwriting.title' ]
+		);
+
+		/*
+		 * Make the existing SignWriting stylesheet available.
+		 */
+		$outputPage->addModuleStyles(
+			[ 'ext.signwriting.styles' ]
+		);
+	}
+
 	public static function renderSignWriting(
 		string $input,
 		array $args,
 		Parser $parser,
 		PPFrame $frame
 	): string {
-		/*
-		 * Load the stylesheet when the <signwriting> tag is used.
-		 */
 		$parser->getOutput()->addModuleStyles(
 			[ 'ext.signwriting.styles' ]
 		);
@@ -30,8 +112,8 @@ class SignWriting {
 		$renderer = new SVGRenderer();
 
 		/*
-		 * If the input contains paragraph tags, process each
-		 * paragraph independently.
+		 * If the input contains paragraph tags, render each
+		 * paragraph separately.
 		 */
 		if ( preg_match( '/<p\b[^>]*>/i', $input ) ) {
 			return self::renderParagraphs(
@@ -41,9 +123,7 @@ class SignWriting {
 		}
 
 		/*
-		 * No <p> tags were supplied.
-		 *
-		 * Treat the entire contents as one paragraph.
+		 * No <p> tags: treat the input as one paragraph.
 		 */
 		return '<p>'
 			. '<span class="signwriting-paragraph">'
@@ -64,9 +144,6 @@ class SignWriting {
 		string $input,
 		SVGRenderer $renderer
 	): string {
-		/*
-		 * Match complete paragraph elements.
-		 */
 		$parts = preg_split(
 			'/(<p\b[^>]*>.*?<\/p>)/is',
 			$input,
@@ -79,7 +156,7 @@ class SignWriting {
 		foreach ( $parts as $part ) {
 
 			/*
-			 * A complete paragraph.
+			 * Complete paragraph.
 			 */
 			if ( preg_match(
 				'/^<p\b([^>]*)>(.*?)<\/p>$/is',
@@ -113,9 +190,6 @@ class SignWriting {
 				continue;
 			}
 
-			/*
-			 * Preserve other content outside paragraphs.
-			 */
 			$output[] = $part;
 		}
 
@@ -124,15 +198,6 @@ class SignWriting {
 
 	/**
 	 * Render whitespace-separated FSW signs.
-	 *
-	 * Any whitespace can separate signs:
-	 *
-	 *     FSW1 FSW2
-	 *
-	 *     FSW1
-	 *     FSW2
-	 *
-	 *     FSW1    FSW2
 	 */
 	private static function renderSignSequence(
 		string $input,
@@ -148,13 +213,6 @@ class SignWriting {
 		$output = [];
 
 		foreach ( $parts as $fsw ) {
-			/*
-			 * Give every sign its own independent box.
-			 *
-			 * This is important for the CSS multi-column layout:
-			 * the wrapper is the actual column item, so its border,
-			 * spacing, and centering belong to one complete sign.
-			 */
 			$output[] =
 				'<span class="signwriting-item">'
 				. self::renderFSW(
