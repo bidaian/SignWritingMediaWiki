@@ -54,7 +54,7 @@ ve.ui.MWSignWritingContextItem.static.commandName =
 	'mwSignWriting';
 
 ve.ui.MWSignWritingContextItem.static.inlineEditCommand =
-	'mwSignWritingInspector';
+	'mwSignWritingDialog';
 
 /* Registration */
 
@@ -71,7 +71,7 @@ ve.ui.commandRegistry.register(
 		'window',
 		'open',
 		{
-			args: [ 'mwSignWritingInspector' ],
+			args: [ 'mwSignWritingDialog' ],
 			supportedSelections: [ 'linear' ]
 		}
 	)

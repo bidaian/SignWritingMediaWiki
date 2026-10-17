@@ -130,6 +130,10 @@
 	border-bottom: 2px solid rgba(0, 0, 0, 0.15) !important;
 }
 
+a .signwriting {
+    border-bottom-color: #36c !important;
+}
+
 
 /*
  * ------------------------------------------------------------
@@ -226,4 +230,27 @@ p:has(> .signwriting-paragraph) {
 .mw-signwriting-title .signwriting svg {
 	display: block;
 	margin: 0 !important;
+}
+
+/*
+ * ------------------------------------------------------------
+ * Style for sign links
+ * ------------------------------------------------------------
+ */
+.mw-signwriting-link {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+a .mw-signwriting-link {
+	cursor: pointer;
+}
+
+a .mw-signwriting-link svg {
+	opacity: 0.85;
+	transition: opacity 0.1s ease;
+}
+
+a:hover .mw-signwriting-link svg {
+	opacity: 1;
 }

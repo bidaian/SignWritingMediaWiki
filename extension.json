@@ -59,7 +59,7 @@
 	"scripts": [
 		"ve/dm/ve.dm.MWSignWritingNode.js",
 		"ve/ce/ve.ce.MWSignWritingNode.js",
-		"ve/ui/ve.ui.MWSignWritingInspector.js",
+		"ve/ui/ve.ui.MWSignWritingDialog.js",
 		"ve/ui/ve.ui.MWSignWritingContextItem.js"
 	],
 	"dependencies": [
@@ -71,7 +71,8 @@
 
 	"Hooks": {
 		"ParserFirstCallInit": "MediaWiki\\Extension\\SignWriting\\SignWriting::onParserFirstCallInit",
-		"OutputPageParserOutput": "MediaWiki\\Extension\\SignWriting\\SignWriting::onOutputPageParserOutput"
+		"OutputPageParserOutput": "MediaWiki\\Extension\\SignWriting\\SignWriting::onOutputPageParserOutput",
+	"HtmlPageLinkRendererEnd": "MediaWiki\\Extension\\SignWriting\\SignWriting::onHtmlPageLinkRendererEnd"
 	},
 "SpecialPages": {
 	"SignWritingEdit": {

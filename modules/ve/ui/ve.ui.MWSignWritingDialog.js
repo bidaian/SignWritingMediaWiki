@@ -1,6 +1,6 @@
 /*!
 
-* VisualEditor UserInterface MWSignWritingInspector class.
+* VisualEditor UserInterface MWSignWritingDialog class.
 *
 * @license MIT
   */
@@ -15,9 +15,9 @@
 * @constructor
 * @param {Object} [config] Configuration options
   */
-  ve.ui.MWSignWritingInspector = function VeUiMWSignWritingInspector( config ) {
+  ve.ui.MWSignWritingDialog = function VeUiMWSignWritingDialog( config ) {
   // Parent constructor
-  ve.ui.MWSignWritingInspector.super.call( this, config );
+  ve.ui.MWSignWritingDialog.super.call( this, config );
 
   this.iframe = null;
   this.messageHandler = null;
@@ -26,23 +26,23 @@
 /* Inheritance */
 
 OO.inheritClass(
-ve.ui.MWSignWritingInspector,
+ve.ui.MWSignWritingDialog,
 ve.ui.MWExtensionPreviewDialog
 );
 
 /* Static properties */
 
-ve.ui.MWSignWritingInspector.static.name = 'mwSignWritingInspector';
+ve.ui.MWSignWritingDialog.static.name = 'mwSignWritingDialog';
 
-ve.ui.MWSignWritingInspector.static.title = 'SignWriting';
+ve.ui.MWSignWritingDialog.static.title = 'SignWriting';
 
 /*
 
 * Use the same window sizing mechanism as Math.
   */
-  ve.ui.MWSignWritingInspector.static.size = 'larger';
+  ve.ui.MWSignWritingDialog.static.size = 'larger';
 
-ve.ui.MWSignWritingInspector.static.modelClasses = [
+ve.ui.MWSignWritingDialog.static.modelClasses = [
 ve.dm.MWSignWritingNode
 ];
 
@@ -52,9 +52,9 @@ ve.dm.MWSignWritingNode
 
 * @inheritdoc
   */
-  ve.ui.MWSignWritingInspector.prototype.initialize = function () {
+  ve.ui.MWSignWritingDialog.prototype.initialize = function () {
   // Parent method
-  ve.ui.MWSignWritingInspector.super.prototype.initialize.call( this );
+  ve.ui.MWSignWritingDialog.super.prototype.initialize.call( this );
 
   /*
 
@@ -80,7 +80,7 @@ ve.dm.MWSignWritingNode
 *
 * @return {string}
   */
-  ve.ui.MWSignWritingInspector.prototype.getFSW = function () {
+  ve.ui.MWSignWritingDialog.prototype.getFSW = function () {
   var mwData = this.selectedNode.getAttribute( 'mw' );
 
   if (
@@ -98,8 +98,8 @@ ve.dm.MWSignWritingNode
 
 * @inheritdoc
   */
-  ve.ui.MWSignWritingInspector.prototype.getSetupProcess = function ( data ) {
-  return ve.ui.MWSignWritingInspector.super.prototype
+  ve.ui.MWSignWritingDialog.prototype.getSetupProcess = function ( data ) {
+  return ve.ui.MWSignWritingDialog.super.prototype
   .getSetupProcess.call( this, data )
   .next( function () {
   /*
@@ -146,8 +146,8 @@ ve.dm.MWSignWritingNode
 
 * @inheritdoc
   */
-  ve.ui.MWSignWritingInspector.prototype.getTeardownProcess = function ( data ) {
-  return ve.ui.MWSignWritingInspector.super.prototype
+  ve.ui.MWSignWritingDialog.prototype.getTeardownProcess = function ( data ) {
+  return ve.ui.MWSignWritingDialog.super.prototype
   .getTeardownProcess.call( this, data )
   .next( function () {
   if ( this.messageHandler ) {
@@ -176,7 +176,7 @@ ve.dm.MWSignWritingNode
 *
 * @param {Object} mwData MediaWiki data object
   */
-  ve.ui.MWSignWritingInspector.prototype.updateMwData = function ( mwData ) {
+  ve.ui.MWSignWritingDialog.prototype.updateMwData = function ( mwData ) {
   /*
 
   * SignMaker is the editor, so there is no input value
@@ -193,7 +193,7 @@ ve.dm.MWSignWritingNode
 *
 * @param {string} fsw FSW notation
   */
-  ve.ui.MWSignWritingInspector.prototype.loadSignMaker = function ( fsw ) {
+  ve.ui.MWSignWritingDialog.prototype.loadSignMaker = function ( fsw ) {
   if (
   !this.iframe ||
   !this.iframe.contentWindow
@@ -215,7 +215,7 @@ ve.dm.MWSignWritingNode
 *
 * @param {MessageEvent} event Message event
   */
-  ve.ui.MWSignWritingInspector.prototype.onSignMakerMessage = function ( event ) {
+  ve.ui.MWSignWritingDialog.prototype.onSignMakerMessage = function ( event ) {
   if (
   !event.data ||
   event.data.signmaker !== 'save'
@@ -286,13 +286,13 @@ ve.dm.MWSignWritingNode
 *
 * @return {number}
   */
-  ve.ui.MWSignWritingInspector.prototype.getBodyHeight = function () {
+  ve.ui.MWSignWritingDialog.prototype.getBodyHeight = function () {
   return 600;
   };
 
 /* Registration */
 
 ve.ui.windowFactory.register(
-ve.ui.MWSignWritingInspector
+ve.ui.MWSignWritingDialog
 );
 

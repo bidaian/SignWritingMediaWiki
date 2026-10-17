@@ -4,6 +4,9 @@ namespace MediaWiki\Extension\SignWriting;
 
 use MediaWiki\Output\OutputPage;
 use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Linker\LinkRenderer;
+use MediaWiki\Linker\LinkTarget;
+use Wikimedia\HtmlArmor\HtmlArmor;
 use Parser;
 use PPFrame;
 
@@ -38,8 +41,8 @@ class SignWriting {
 		/*
 		 * Try to parse the page title as FSW.
 		 *
-		 * FSWParser is responsible for deciding whether the
-		 * title is actually a valid SignWriting string.
+		 * FSWParser is the authority for deciding whether the
+		 * title is a valid SignWriting string.
 		 */
 		try {
 			$sign = FSWParser::parse( $fsw );
@@ -48,7 +51,7 @@ class SignWriting {
 		}
 
 		/*
-		 * Use the same SVGRenderer as the <signwriting> parser tag.
+		 * Use the same SVGRenderer used by <signwriting>.
 		 */
 		try {
 			$renderer = new SVGRenderer();
@@ -66,18 +69,19 @@ class SignWriting {
 		}
 
 		/*
-		 * The title pipeline accepts this HTML placeholder.
-		 *
-		 * The actual SVG is inserted later by JavaScript because
-		 * MediaWiki does not allow the SVG markup itself to survive
-		 * the title processing pipeline.
+		 * The SVG itself cannot safely survive the display-title
+		 * processing pipeline, so put a harmless placeholder there.
 		 */
 		$parserOutput->setDisplayTitle(
 			'<span class="mw-signwriting-title"></span>'
 		);
 
 		/*
-		 * Pass the already-generated SVG to JavaScript.
+		 * Pass the already-rendered SVG to JavaScript.
+		 *
+		 * OutputPage::addJsConfigVars() is used here because this
+		 * is the mechanism verified to work with this MediaWiki
+		 * version.
 		 */
 		$outputPage->addJsConfigVars(
 			'wgSignWritingTitleSvg',
@@ -85,17 +89,96 @@ class SignWriting {
 		);
 
 		/*
-		 * Load the small title integration module.
+		 * Load the title integration module.
 		 */
 		$outputPage->addModules(
 			[ 'ext.signwriting.title' ]
 		);
 
 		/*
-		 * Make the existing SignWriting stylesheet available.
+		 * Make the existing SignWriting CSS available.
 		 */
 		$outputPage->addModuleStyles(
 			[ 'ext.signwriting.styles' ]
+		);
+	}
+
+	/**
+	 * Replace the contents of an FSW wikilink with its SignWriting SVG.
+	 *
+	 * MediaWiki itself continues to generate the <a> element, so
+	 * the resulting SVG remains clickable.
+	 *
+	 * @param LinkRenderer $linkRenderer
+	 * @param LinkTarget $target
+	 * @param bool $isKnown
+	 * @param string|HtmlArmor &$text
+	 * @param array &$attribs
+	 * @param string &$ret
+	 */
+	public static function onHtmlPageLinkRendererEnd(
+		LinkRenderer $linkRenderer,
+		LinkTarget $target,
+		bool $isKnown,
+		&$text,
+		&$attribs,
+		&$ret
+	): void {
+		/*
+		 * The link target itself is the FSW string.
+		 *
+		 * This means the hook works regardless of what the visible
+		 * link text originally contained.
+		 */
+		$fsw = $target->getText();
+
+		if ( $fsw === '' ) {
+			return;
+		}
+
+		/*
+		 * Determine whether the target is valid FSW.
+		 *
+		 * Invalid/non-FSW page links are left completely untouched.
+		 */
+		try {
+			$sign = FSWParser::parse( $fsw );
+		} catch ( \Throwable $e ) {
+			return;
+		}
+
+		/*
+		 * Render using the existing SignWriting renderer.
+		 */
+		try {
+			$renderer = new SVGRenderer();
+
+			$svg = $renderer->render(
+				$sign,
+				$fsw
+			);
+		} catch ( \Throwable $e ) {
+			return;
+		}
+
+		if ( $svg === '' ) {
+			return;
+		}
+
+		/*
+		 * Replace only the contents of the link.
+		 *
+		 * MediaWiki will still generate:
+		 *
+		 * <a href="..."> ...our SVG... </a>
+		 *
+		 * HtmlArmor tells MediaWiki that the SVG is already safe HTML
+		 * and must not be escaped.
+		 */
+		$text = new HtmlArmor(
+			'<span class="mw-signwriting-link">'
+			. $svg
+			. '</span>'
 		);
 	}
 
