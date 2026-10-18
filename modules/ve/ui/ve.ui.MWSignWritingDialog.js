@@ -21,6 +21,8 @@
 
   this.iframe = null;
   this.messageHandler = null;
+  this.isInsertion = false;
+
   };
 
 /* Inheritance */
@@ -81,6 +83,10 @@ ve.dm.MWSignWritingNode
 * @return {string}
   */
   ve.ui.MWSignWritingDialog.prototype.getFSW = function () {
+  if ( this.isInsertion || !this.selectedNode ) {
+    return '';
+  }
+
   var mwData = this.selectedNode.getAttribute( 'mw' );
 
   if (
@@ -102,6 +108,8 @@ ve.dm.MWSignWritingNode
   return ve.ui.MWSignWritingDialog.super.prototype
   .getSetupProcess.call( this, data )
   .next( function () {
+  this.isInsertion = !!( data && data.insertion );
+
   /*
   * Create a new SignMaker iframe every time
   * the dialog is opened.
@@ -235,6 +243,32 @@ ve.dm.MWSignWritingNode
   if ( typeof fsw !== 'string' ) {
   return;
   }
+
+  /*
+   * Insert a new inline extension node when the dialog
+   * was opened from the insertion tool.
+   */
+  if ( this.isInsertion ) {
+    var fragment = this.getFragment();
+    fragment.insertContent( [
+      {
+        type: 'mwSignWriting',
+        attributes: {
+          mw: {
+            name: 'signwriting',
+            attrs: {},
+            body: {
+              extsrc: fsw
+            }
+          }
+        }
+      }
+    ] ).collapseRangeToEnd().select();
+
+    this.close( { action: 'done' } );
+    return;
+  }
+
 
   var mwData = ve.copy(
   this.selectedNode.getAttribute( 'mw' )

@@ -60,6 +60,7 @@
 		"ve/dm/ve.dm.MWSignWritingNode.js",
 		"ve/ce/ve.ce.MWSignWritingNode.js",
 		"ve/ui/ve.ui.MWSignWritingDialog.js",
+		"ve/ui/ve.ui.MWSignWritingInsertTool.js",
 		"ve/ui/ve.ui.MWSignWritingContextItem.js"
 	],
 	"dependencies": [
