@@ -51,8 +51,19 @@ ve.ce.MWSignWritingNode.prototype.onSetup = function () {
 	// Parent method
 	ve.ce.MWSignWritingNode.super.prototype.onSetup.apply( this, arguments );
 
+	// Never register twice for the same node
+	this.removeSignListener();
+
 	this.onSignMouseDown = function ( e ) {
-		var hit = null;
+		var hit = null,
+			model = node.model;
+
+		// The node was destroyed without a teardown (this happens to the
+		// preview node inside the dialog): stop listening.
+		if ( !model || !node.$element ) {
+			node.removeSignListener();
+			return;
+		}
 
 		node.$element.find( '.signwriting-item' ).each( function () {
 			var r = this.getBoundingClientRect();
@@ -67,7 +78,7 @@ ve.ce.MWSignWritingNode.prototype.onSetup = function () {
 
 		if ( !hit ) {
 			// Press was elsewhere: forget any earlier target.
-			node.model.signTarget = null;
+			model.signTarget = null;
 			return;
 		}
 
@@ -82,23 +93,43 @@ ve.ce.MWSignWritingNode.prototype.onSetup = function () {
 
 		// Plain property on the DM node: not an attribute, so it never
 		// enters a transaction or the saved wikitext.
-		node.model.signTarget = { fsw: fsw, occurrence: occurrence };
+		model.signTarget = { fsw: fsw, occurrence: occurrence };
 	};
 
 	document.addEventListener( 'mousedown', this.onSignMouseDown, true );
 };
 
 /**
- * @inheritdoc
+ * Stop listening for presses. Safe to call more than once.
  */
-ve.ce.MWSignWritingNode.prototype.onTeardown = function () {
+ve.ce.MWSignWritingNode.prototype.removeSignListener = function () {
 	if ( this.onSignMouseDown ) {
 		document.removeEventListener( 'mousedown', this.onSignMouseDown, true );
 	}
 	this.onSignMouseDown = null;
+};
+
+/**
+ * @inheritdoc
+ */
+ve.ce.MWSignWritingNode.prototype.onTeardown = function () {
+	this.removeSignListener();
 
 	// Parent method
 	ve.ce.MWSignWritingNode.super.prototype.onTeardown.apply( this, arguments );
+};
+
+/**
+ * Also clean up when the node is destroyed without a teardown,
+ * as the dialog's preview node is.
+ *
+ * @inheritdoc
+ */
+ve.ce.MWSignWritingNode.prototype.destroy = function () {
+	this.removeSignListener();
+
+	// Parent method
+	ve.ce.MWSignWritingNode.super.prototype.destroy.apply( this, arguments );
 };
 
 /* Registration */
