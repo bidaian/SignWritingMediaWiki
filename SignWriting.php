@@ -192,6 +192,24 @@ class SignWriting {
 			[ 'ext.signwriting.styles' ]
 		);
 
+		return self::renderMarkup( $input );
+	}
+
+	/**
+	 * Render the contents of a <signwriting> tag.
+	 *
+	 * Shared by the legacy parser hook and the Parsoid handler so
+	 * that both produce identical per-sign markup.
+	 *
+	 * @param string $input Tag contents
+	 * @param bool $inline If true, omit the outer <p> wrapper
+	 *  (used inside the Parsoid inline <span>)
+	 * @return string HTML
+	 */
+	public static function renderMarkup(
+		string $input,
+		bool $inline = false
+	): string {
 		$renderer = new SVGRenderer();
 
 		/*
@@ -208,16 +226,16 @@ class SignWriting {
 		/*
 		 * No <p> tags: treat the input as one paragraph.
 		 */
-		return '<p>'
-			. '<span class="signwriting-paragraph">'
+		$html = '<span class="signwriting-paragraph">'
 			. '<span class="signwriting-flow">'
 			. self::renderSignSequence(
 				$input,
 				$renderer
 			)
 			. '</span>'
-			. '</span>'
-			. '</p>';
+			. '</span>';
+
+		return $inline ? $html : '<p>' . $html . '</p>';
 	}
 
 	/**
@@ -296,8 +314,18 @@ class SignWriting {
 		$output = [];
 
 		foreach ( $parts as $fsw ) {
+			/*
+			 * data-fsw lets the VisualEditor know which sign
+			 * was clicked.
+			 */
 			$output[] =
-				'<span class="signwriting-item">'
+				'<span class="signwriting-item" data-fsw="'
+				. htmlspecialchars(
+					$fsw,
+					ENT_QUOTES | ENT_SUBSTITUTE,
+					'UTF-8'
+				)
+				. '">'
 				. self::renderFSW(
 					$fsw,
 					$renderer

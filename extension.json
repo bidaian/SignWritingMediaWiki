@@ -64,7 +64,8 @@
 		"ve/ui/ve.ui.MWSignWritingContextItem.js"
 	],
 	"dependencies": [
-		"ext.visualEditor.mwcore"
+		"ext.visualEditor.mwcore",
+		"ext.signwriting.styles"
 	]
 }
 	
